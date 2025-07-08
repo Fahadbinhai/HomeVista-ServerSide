@@ -27,8 +27,32 @@ async function run() {
     try {
 
 
+        // creating collection
+
+        const HomeVista = client.db("HomeVistaDatabase");
+        const propertyCollection = HomeVista.collection("PropertyCollection")
 
 
+        // agent adding properties 
+        app.post('/addProperty', async (req, res) => {
+
+            const property = req.body;
+
+            const result = await propertyCollection.insertOne(property)
+
+            res.send(result)
+            console.log(result)
+
+        })
+
+        // loading unverified properties for admin verify
+
+        app.get('/unverified', async (req, res) => {
+
+            const result = await propertyCollection.find({ isVerified: false }).toArray()
+
+            res.send(result)
+        })
 
 
 
