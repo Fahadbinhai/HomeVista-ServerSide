@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const app = express();
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 3000;
 
 // middleware  
@@ -50,6 +50,35 @@ async function run() {
         app.get('/unverified', async (req, res) => {
 
             const result = await propertyCollection.find({ isVerified: false }).toArray()
+
+            res.send(result)
+        })
+
+        // admin approved routes
+
+        app.patch('/adminVerifyProperties/:id', async (req, res) => {
+
+            const id = req.params.id
+
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: { isVerified: true }
+            }
+
+            const result = await propertyCollection.updateOne(filter, updateDoc);
+
+            res.send(result);
+
+        })
+
+        // Delete property rejected by admin
+
+        app.delete('/deleteProperty/:id', async (req, res) => {
+            const id = req.params.id
+
+            const query = { _id: new ObjectId(id) }
+
+            const result = await propertyCollection.deleteOne(query)
 
             res.send(result)
         })
