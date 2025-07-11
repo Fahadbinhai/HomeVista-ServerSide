@@ -30,7 +30,32 @@ async function run() {
         // creating collection
 
         const HomeVista = client.db("HomeVistaDatabase");
+        const userCollection = HomeVista.collection("users")
         const propertyCollection = HomeVista.collection("PropertyCollection")
+
+
+        // saving user 
+
+        app.post("/users", async (req, res) => {
+
+            const email = req.body.email
+
+            const existing = await userCollection.findOne({ email })
+
+            if (existing) {
+                return res.send({ message: 'User already exists', inserted: false });
+            }
+
+            const user = req.body;
+
+            const result = await userCollection.insertOne(user)
+            
+            res.send(result)
+
+        })
+
+
+
 
 
         // agent adding properties 
@@ -41,7 +66,6 @@ async function run() {
             const result = await propertyCollection.insertOne(property)
 
             res.send(result)
-            console.log(result)
 
         })
 
