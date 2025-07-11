@@ -49,10 +49,18 @@ async function run() {
             const user = req.body;
 
             const result = await userCollection.insertOne(user)
-            
+
             res.send(result)
 
         })
+
+        // getting user data
+
+        app.get("/user", async (req, res) => {
+            const email = req.query.email;
+            const user = await userCollection.findOne({ email: email });
+            res.json(user);
+        });
 
 
 
