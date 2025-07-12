@@ -86,6 +86,27 @@ async function run() {
             res.send(result)
         })
 
+
+        // verified property to display
+
+        app.get("/verifiedProperties", async (req, res) => {
+            const result = await propertyCollection.find({ isVerified: true }).toArray()
+
+            res.send(result)
+        })
+
+        // showing all properties of agent 
+
+        app.get('/agentAddedProperties', async (req, res) => {
+            const agentEmail = req.query.email
+
+            const result = await propertyCollection.find({ agentEmail: agentEmail }).toArray()
+
+            res.send(result)
+        })
+
+
+
         // admin approved routes
 
         app.patch('/adminVerifyProperties/:id', async (req, res) => {
