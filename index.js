@@ -124,6 +124,23 @@ async function run() {
 
         })
 
+        // admin rejected routes
+
+        app.patch('/adminRejectedProperties/:id', async (req, res) => {
+
+            const id = req.params.id
+
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: { isVerified: "rejected" }
+            }
+
+            const result = await propertyCollection.updateOne(filter, updateDoc);
+
+            res.send(result);
+
+        })
+
         // Delete property rejected by admin
 
         app.delete('/deleteProperty/:id', async (req, res) => {
