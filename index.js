@@ -95,6 +95,18 @@ async function run() {
             res.send(result)
         })
 
+        // getting single properties for details page
+
+        app.get("/details/:id", async (req, res) => {
+            const id = req.params.id
+
+            const query = { _id: new ObjectId(id) }
+
+            const result = await propertyCollection.findOne(query)
+
+            res.send(result)
+        })
+
         // showing all properties of agent 
 
         app.get('/agentAddedProperties', async (req, res) => {
