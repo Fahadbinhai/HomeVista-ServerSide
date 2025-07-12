@@ -141,7 +141,36 @@ async function run() {
 
         })
 
-        // Delete property rejected by admin
+        // server.js বা routes file এ
+        app.patch('/updateProperty/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const updatedProperty = req.body;
+
+                const filter = { _id: new ObjectId(id) };
+
+                const updateDoc = {
+                    $set: {
+                        propertyName: updatedProperty.propertyName,
+                        location: updatedProperty.location,
+                        minimumPrice: updatedProperty.minimumPrice,
+                        maximumPrice: updatedProperty.maximumPrice,
+                        isVerified: false  // ✅ update এর পর always verify এর জন্য admin এর কাছে যাবে
+                    }
+                };
+
+                const result = await propertyCollection.updateOne(filter, updateDoc);
+                res.send(result);
+
+            } catch (error) {
+                console.error('Update failed:', error);
+                res.status(500).send({ message: 'Update failed', error });
+            }
+        });
+
+
+
+        // Delete property by agent
 
         app.delete('/deleteProperty/:id', async (req, res) => {
             const id = req.params.id
