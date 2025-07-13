@@ -33,6 +33,7 @@ async function run() {
         const userCollection = HomeVista.collection("users")
         const propertyCollection = HomeVista.collection("PropertyCollection")
         const wishListCollection = HomeVista.collection("wishList")
+        const offerDataList = HomeVista.collection('offerData')
 
 
         // saving user 
@@ -93,6 +94,26 @@ async function run() {
             res.send(result)
         })
 
+        // get data for offer bid
+
+        app.get('/makeOffer/:id', async (req, res) => {
+            const id = req.params.id
+
+            const query = { _id: new ObjectId(id) }
+
+            const result = await wishListCollection.findOne(query)
+
+            res.send(result)
+        })
+
+        // saving offer data 
+        app.post('/offers', async (req, res) => {
+            const offerData = req.body
+
+            const result = await offerDataList.insertOne(offerData)
+
+            res.send(result)
+        })
 
 
 
