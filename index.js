@@ -32,6 +32,7 @@ async function run() {
         const HomeVista = client.db("HomeVistaDatabase");
         const userCollection = HomeVista.collection("users")
         const propertyCollection = HomeVista.collection("PropertyCollection")
+        const wishListCollection = HomeVista.collection("wishList")
 
 
         // saving user 
@@ -60,6 +61,24 @@ async function run() {
             const email = req.query.email;
             const user = await userCollection.findOne({ email: email });
             res.json(user);
+        });
+
+        // all user wishList
+
+        app.post("/wishList", async (req, res) => {
+            const wishProperty = req.body
+
+            const result = await wishListCollection.insertOne(wishProperty);
+
+            res.send(result)
+        })
+
+        // get specific users wishlist
+
+        app.get('/wishlist', async (req, res) => {
+            const userEmail = req.query.email;
+            const result = await wishListCollection.find({ email: userEmail }).toArray();
+            res.send(result);
         });
 
 
