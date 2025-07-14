@@ -115,19 +115,110 @@ async function run() {
             res.send(result)
         })
 
+        // get offer data
+
+        app.get('/offer', async (req, res) => {
+            const email = req.query.email
+
+            const result = await offerDataList.find({ agentEmail: email }).toArray()
+
+            res.send(result)
+        })
+
+        // ----------------------------------------------------------------------------------------------------
+
+        // bid handle 
+
+        // accept an offer and reject others for the same property
+        app.patch('/agentAccepted/:id', async (req, res) => {
+            const id = req.params.id;
+
+            // accept this offer
+            const acceptResult = await offerDataList.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { status: 'accepted' } }
+            );
+
+            // find accepted offer details to get propertyId
+            const acceptedOffer = await offerDataList.findOne({ _id: new ObjectId(id) });
+
+            // reject other offers for the same property (except accepted one)
+            const rejectOthers = await offerDataList.updateMany(
+                {
+                    propertyId: acceptedOffer.propertyId,
+                    _id: { $ne: new ObjectId(id) }
+                },
+                { $set: { status: 'rejected' } }
+            );
+
+            res.send({ message: 'Offer accepted & others rejected', acceptResult, rejectOthers });
+        });
+
+        // reject an offer
+        app.patch('/agentRejected/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const rejectResult = await offerDataList.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { status: 'rejected' } }
+            );
+
+            res.send({ message: 'Offer rejected', rejectResult });
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
         // agent adding properties 
-        app.post('/addProperty', async (req, res) => {
+        // app.post('/addProperty', async (req, res) => {
 
+        //     const property = req.body;
+
+        //     const result = await propertyCollection.insertOne(property)
+
+        //     res.send(result)
+
+        // })
+
+        app.post('/addProperty', async (req, res) => {
             const property = req.body;
 
-            const result = await propertyCollection.insertOne(property)
+            const result = await propertyCollection.insertOne(property);
 
-            res.send(result)
+            if (result.insertedId) {
+                res.send({
+                    insertedId: result.insertedId.toString(),
+                    message: 'Property added successfully'
+                });
+            } else {
+                res.status(500).send({ message: 'Failed to add property' });
+            }
+        });
 
-        })
 
         // loading unverified properties for admin verify
 
