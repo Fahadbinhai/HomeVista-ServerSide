@@ -64,6 +64,26 @@ async function run() {
             res.json(user);
         });
 
+
+        // making admin
+
+        app.patch('/makeAdmin/:id', async (req, res) => {
+            const id = req.params.id
+
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: { role: 'admin' }
+            }
+
+            const result = await userCollection.updateOne(filter, updateDoc)
+
+            res.send(result)
+        })
+
+
+
+
+
         // all user wishList
 
         app.post("/wishList", async (req, res) => {
@@ -179,6 +199,13 @@ async function run() {
         })
 
 
+        // getting all users from the database
+
+        app.get('/allUsers', async (req, res) => {
+            const result = await userCollection.find().toArray()
+
+            res.send(result)
+        })
 
 
 
