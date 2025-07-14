@@ -168,7 +168,15 @@ async function run() {
 
 
 
+        // showing data for property bought route in user panel
 
+        app.get('/boughtProperty', async (req, res) => {
+            const singleEmail = req.query.email
+
+            const result = await offerDataList.find({ buyerEmail: singleEmail }).toArray()
+
+            res.send(result)
+        })
 
 
 
