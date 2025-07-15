@@ -1,8 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require("firebase-admin");
+
 const app = express();
 require('dotenv').config();
+
+const stripe = require('stripe')(process.env.SECRET_PAYMENT_KEY);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 3000;
 
@@ -296,9 +299,36 @@ async function run() {
 
 
 
+        // adding apis for payment
+
+        // get offerData for offer price
+
+        app.get('/getOfferPrice/:id', async (req, res) => {
+            const offerDataId = req.params.id
+
+            const filter = { _id: new ObjectId(offerDataId) }
+
+            const result = await offerDataList.findOne(filter)
+
+            res.send(result)
+        })
 
 
+        // creating payment intend
 
+        app.post('/create-payment-intent', async (req, res) => {
+            const { amount } = req.body;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount,
+                currency: 'usd',
+                
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            });
+        });
 
 
 
