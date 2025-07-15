@@ -80,6 +80,20 @@ async function run() {
             res.send(result)
         })
 
+        // making agent
+
+        app.patch('/makeAgent/:id', async (req, res) => {
+            const id = req.params.id
+
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: { role: 'agent' }
+            }
+
+            const result = await userCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
 
 
 
