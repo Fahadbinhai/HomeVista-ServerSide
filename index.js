@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const admin = require("firebase-admin");
 const app = express();
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -8,6 +9,15 @@ const port = process.env.PORT || 3000;
 // middleware  
 app.use(cors());
 app.use(express.json());
+
+
+
+
+const serviceAccount = require("./firebaseAdminSDK.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount)
+});
 
 
 
@@ -93,6 +103,31 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
+
+        // delete user from db and firebase
+
+        app.delete('/deleteUser/:id', async (req, res) => {
+            const deleteId = req.params.id
+
+            const filter = { _id: new ObjectId(deleteId) }
+            const user = await userCollection.findOne(filter)
+
+            if (!user) {
+                return res.status(404).send({ message: 'user not found' })
+            }
+
+            const firebaseUser = await admin.auth().getUserByEmail(user.email)
+
+
+            await admin.auth().deleteUser(firebaseUser.uid)
+            const result = await userCollection.deleteOne(filter)
+
+            res.send(result)
+        })
+
+
+        // mark an agent fraud 
+
 
 
 
