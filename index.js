@@ -263,6 +263,15 @@ async function run() {
         });
 
 
+        // delete rejected offer
+        app.delete('/deleteOffer/:id', async (req, res) => {
+            const id = req.params.id;
+            const result = await offerDataList.deleteOne({ _id: new ObjectId(id) });
+            res.send(result);
+        });
+
+
+
 
         // showing data for property bought route in user panel
 
