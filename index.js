@@ -128,6 +128,33 @@ async function run() {
 
         // mark an agent fraud 
 
+        app.patch('/markFraud/:id', async (req, res) => {
+            const id = req.params.id
+
+            const filter = { _id: new ObjectId(id) }
+
+            const updateDoc = {
+                $set: { isFraud: true }
+            }
+
+            const userResult = await userCollection.updateOne(filter, updateDoc)
+
+            const fraudAgent = await userCollection.findOne(filter)
+            if (!fraudAgent) {
+                return res.status(404).send({ message: 'agent not found' })
+            }
+
+            const emailFilter = { agentEmail: fraudAgent.email };
+
+            const deleteProperty = await propertyCollection.deleteMany(emailFilter)
+            const deleteWishlist = await wishListCollection.deleteMany(emailFilter)
+            const deleteOfferData = await offerDataList.deleteMany(emailFilter)
+
+            res.send({ message: 'Marked as fraud successfully', deleteProperty, deleteWishlist, deleteOfferData })
+
+
+        })
+
 
 
 
