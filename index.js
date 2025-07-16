@@ -47,6 +47,7 @@ async function run() {
         const propertyCollection = HomeVista.collection("PropertyCollection")
         const wishListCollection = HomeVista.collection("wishList")
         const offerDataList = HomeVista.collection('offerData')
+        const savePaymentHistory = HomeVista.collection('Payments')
 
 
         // saving user 
@@ -235,7 +236,7 @@ async function run() {
             // accept this offer
             const acceptResult = await offerDataList.updateOne(
                 { _id: new ObjectId(id) },
-                { $set: { status: 'accepted' } }
+                { $set: { status: 'accepted', paymentStatus: 'pending' } }
             );
 
             // find accepted offer details to get propertyId
@@ -322,12 +323,53 @@ async function run() {
             const paymentIntent = await stripe.paymentIntents.create({
                 amount,
                 currency: 'usd',
-                
+
             });
 
             res.send({
                 clientSecret: paymentIntent.client_secret
             });
+        });
+
+
+        // updating status and saving info in the db
+
+        app.patch('/paymentSuccess/:id', async (req, res) => {
+            const offerId = req.params.id;
+            const { transactionId } = req.body;
+
+            // offer details find করবো
+            const offer = await offerDataList.findOne({ _id: new ObjectId(offerId) });
+
+            // offerDataList এ update করবো
+            await offerDataList.updateOne(
+                { _id: new ObjectId(offerId) },
+                {
+                    $set: {
+                        paymentStatus: 'success',
+                        status: 'bought',
+                        transactionId: transactionId
+                    }
+                }
+            );
+
+            // savePaymentHistory collection এ insert করবো
+            const paymentInfo = {
+                offerId,
+                transactionId,
+                paidAt: new Date(),
+
+                // extra info for sold properties page
+                propertyTitle: offer.propertyName,
+                propertyLocation: offer.location,
+                buyerEmail: offer.buyerEmail,
+                buyerName: offer.buyerName,
+                soldPrice: offer.offerAmount
+            };
+
+            await savePaymentHistory.insertOne(paymentInfo);
+
+            res.send({ message: 'Payment success & history saved' });
         });
 
 
