@@ -48,6 +48,7 @@ async function run() {
         const wishListCollection = HomeVista.collection("wishList")
         const offerDataList = HomeVista.collection('offerData')
         const savePaymentHistory = HomeVista.collection('Payments')
+        const saveComment = HomeVista.collection('comments')
 
 
         // saving user 
@@ -384,6 +385,55 @@ async function run() {
             res.send(result)
         })
 
+
+
+        // upload Comment
+
+        app.post('/uploadComment', async (req, res) => {
+
+            const comment = req.body
+            const result = await saveComment.insertOne(comment)
+
+            res.send(result)
+        })
+
+        // get all comments for admin
+
+        app.get('/allComments', async (req, res) => {
+            const result = await saveComment.find().toArray()
+            res.send(result)
+        })
+
+        // get comment for specific user
+
+        app.get('/userReview', async (req, res) => {
+            const email = req.query.email
+
+            const result = await saveComment.find({ userEmail: email }).toArray()
+
+            res.send(result)
+        })
+
+
+        // get comments for property
+
+        app.get('/getComment/:id', async (req, res) => {
+            const id = req.params.id
+
+            const result = await saveComment.find({ propertyId: id }).toArray()
+            res.send(result)
+        })
+
+        // delete comment
+
+        app.delete('/deleteComment/:id', async (req, res) => {
+            const deleteId = req.params.id
+
+            const filter = { _id: new ObjectId(deleteId) }
+
+            const result = await saveComment.deleteOne(filter)
+            res.send(result)
+        })
 
 
 
