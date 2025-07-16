@@ -364,7 +364,9 @@ async function run() {
                 propertyLocation: offer.location,
                 buyerEmail: offer.buyerEmail,
                 buyerName: offer.buyerName,
-                soldPrice: offer.offerAmount
+                soldPrice: offer.offerAmount,
+                agentName: offer.agentName,
+                agentEmail: offer.agentEmail
             };
 
             await savePaymentHistory.insertOne(paymentInfo);
@@ -372,6 +374,15 @@ async function run() {
             res.send({ message: 'Payment success & history saved' });
         });
 
+        // get sold properties for specific agents
+
+        app.get('/getSoldProperties', async (req, res) => {
+            const emailAgent = req.query.email
+
+            const result = await savePaymentHistory.find({ agentEmail: emailAgent }).toArray()
+
+            res.send(result)
+        })
 
 
 
