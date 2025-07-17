@@ -404,6 +404,18 @@ async function run() {
             res.send(result)
         })
 
+        // get latest comments for home page
+
+        app.get('/latestComments', async (req, res) => {
+            const result = await saveComment
+                .find()
+                .sort({ createdAt: -1 }) 
+                .limit(6)
+                .toArray();
+            res.send(result);
+        });
+
+
         // get comment for specific user
 
         app.get('/userReview', async (req, res) => {
