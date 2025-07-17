@@ -36,6 +36,40 @@ const client = new MongoClient(uri, {
     }
 });
 
+// custom middleware
+
+const verifyFirebaseToken = async (req, res, next) => {
+
+    const authHeader = req?.headers?.authorization
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).send({ massage: 'unauthorized access ' })
+    }
+
+    const token = authHeader.split(' ')[1]
+
+    try {
+
+        const decoded = await admin.auth().verifyIdToken(token)
+
+        // jei req ta astachilo oi khane ar ekta property add korsi req.decoded name er 
+        req.decoded = decoded
+        next()
+
+    }
+    catch (error) {
+        return res.status(401).send({ massage: 'mama unauthorized access nai' })
+    }
+
+
+}
+
+
+
+
+
+
+
 async function run() {
     try {
 
@@ -218,8 +252,12 @@ async function run() {
 
         // get offer data
 
-        app.get('/offer', async (req, res) => {
+        app.get('/offer', verifyFirebaseToken, async (req, res) => {
             const email = req.query.email
+
+            if (email !== req.decoded.email) {
+                return res.status(403).send({ massage: "Unauthorized Access" })
+            }
 
             const result = await offerDataList.find({ agentEmail: email }).toArray()
 
@@ -377,8 +415,12 @@ async function run() {
 
         // get sold properties for specific agents
 
-        app.get('/getSoldProperties', async (req, res) => {
+        app.get('/getSoldProperties', verifyFirebaseToken, async (req, res) => {
             const emailAgent = req.query.email
+
+            if (emailAgent !== req.decoded.email) {
+                return res.status(403).send({ massage: "Unauthorized Access" })
+            }
 
             const result = await savePaymentHistory.find({ agentEmail: emailAgent }).toArray()
 
@@ -409,7 +451,7 @@ async function run() {
         app.get('/latestComments', async (req, res) => {
             const result = await saveComment
                 .find()
-                .sort({ createdAt: -1 }) 
+                .sort({ createdAt: -1 })
                 .limit(6)
                 .toArray();
             res.send(result);
@@ -503,6 +545,8 @@ async function run() {
             res.send(result)
         })
 
+
+
         // getting single properties for details page
 
         app.get("/details/:id", async (req, res) => {
@@ -517,8 +561,12 @@ async function run() {
 
         // showing all properties of agent 
 
-        app.get('/agentAddedProperties', async (req, res) => {
+        app.get('/agentAddedProperties', verifyFirebaseToken, async (req, res) => {
             const agentEmail = req.query.email
+
+            if (agentEmail !== req.decoded.email) {
+                return res.status(403).send({ massage: "Unauthorized Access" })
+            }
 
             const result = await propertyCollection.find({ agentEmail: agentEmail }).toArray()
 
@@ -601,28 +649,6 @@ async function run() {
 
             res.send(result)
         })
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
