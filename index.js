@@ -196,9 +196,6 @@ async function run() {
 
 
 
-
-
-
         // all user wishList
 
         app.post("/wishList", async (req, res) => {
@@ -211,8 +208,13 @@ async function run() {
 
         // get specific users wishlist
 
-        app.get('/wishlist', async (req, res) => {
+        app.get('/wishlist', verifyFirebaseToken, async (req, res) => {
             const userEmail = req.query.email;
+
+            if (userEmail !== req.decoded.email) {
+                return res.status(403).send({ massage: "Unauthorized Access" })
+            }
+
             const result = await wishListCollection.find({ email: userEmail }).toArray();
             res.send(result);
         });
@@ -318,8 +320,12 @@ async function run() {
 
         // showing data for property bought route in user panel
 
-        app.get('/boughtProperty', async (req, res) => {
+        app.get('/boughtProperty', verifyFirebaseToken, async (req, res) => {
             const singleEmail = req.query.email
+
+            if (singleEmail !== req.decoded.email) {
+                return res.status(403).send({ massage: "Unauthorized Access" })
+            }
 
             const result = await offerDataList.find({ buyerEmail: singleEmail }).toArray()
 
