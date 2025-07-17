@@ -15,8 +15,8 @@ app.use(express.json());
 
 
 
-
-const serviceAccount = require("./firebaseAdminSDK.json");
+const decodedKey = Buffer.from(process.env.FB_ADMIN_KEY, 'base64').toString('utf8')  
+const serviceAccount = JSON.parse(decodedKey);
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
