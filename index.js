@@ -15,7 +15,7 @@ app.use(express.json());
 
 
 
-const decodedKey = Buffer.from(process.env.FB_ADMIN_KEY, 'base64').toString('utf8')  
+const decodedKey = Buffer.from(process.env.FB_ADMIN_KEY, 'base64').toString('utf8')
 const serviceAccount = JSON.parse(decodedKey);
 
 admin.initializeApp({
@@ -192,6 +192,24 @@ async function run() {
             res.send({ message: 'Marked as fraud successfully', deleteProperty, deleteWishlist, deleteOfferData })
 
 
+        })
+
+        // is agent fraud check
+
+        app.get('/isFraudAgent', async (req, res) => {
+            const email = req.query.email
+            if (!email) {
+                return res.status(400).json({ error: 'Email is required' });
+            }
+
+            try {
+                const user = await userCollection.findOne({ email: email });
+                const isFraud = user?.isFraud === true;
+
+                res.status(200).json({ isFraud });
+            } catch (error) {
+                res.status(500).json({ error: 'Internal server error' });
+            }
         })
 
 
